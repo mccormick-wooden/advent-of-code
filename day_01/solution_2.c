@@ -10,7 +10,7 @@
 
 // Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
 
-#include<stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 const char* CALORIE_FILE_PATH = "input.txt";
