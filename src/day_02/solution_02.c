@@ -79,15 +79,6 @@ void populateMoves_itercbk(char *line, int lineNumber, void *returnptr) {
 
     moves->oppMoves[lineNumber] = line[0];
     moves->yourMoves[lineNumber] = calculateYourMove(line[0], line[2]);
-    // normalize
-    // char moveToSelect = '\0';
-    // if (line[2] == 'X')
-    //     moveToSelect = 'A';
-    // else if (line[2] == 'Y')
-    //     moveToSelect = 'B';
-    // else if (line[2] == 'Z')
-    //     moveToSelect = 'C';
-    // moves->yourMoves[lineNumber] = moveToSelect;
 }
 
 void fileIterator(FILE *fp, void (*callback)(), void *cbkretptr) {
