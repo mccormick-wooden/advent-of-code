@@ -1,84 +1,75 @@
 // --- Part Two ---
 
-// The Elf finishes helping with the tent and sneaks back over to you.
-// "Anyway, the second column says how the round needs to end: X means you need to lose,
-// Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
+// As you finish identifying the misplaced items, the Elves come to you with another issue.
 
-// The total score is still calculated in the same way, but now you need to figure out what shape to choose
-// so the round ends as indicated. The example above now goes like this:
+// For safety, the Elves are divided into groups of three. Every Elf carries a badge that identifies their group.
+// For efficiency, within each group of three Elves, the badge is the only item type carried by all three Elves.
+// That is, if a group's badge is item type B, then all three Elves will have item type B somewhere in their rucksack,
+// and at most two of the Elves will be carrying any other item type.
 
-//     - In the first round, your opponent will choose Rock (A), and you need the round to end in a draw (Y),
-//         so you also choose Rock. This gives you a score of 1 + 3 = 4.
-//     - In the second round, your opponent will choose Paper (B), and you choose Rock so you lose (X) with a
-//         score of 1 + 0 = 1.
-//     - In the third round, you will defeat your opponent's Scissors with Rock for a score of 1 + 6 = 7.
+// The problem is that someone forgot to put this year's updated authenticity sticker on the badges. All of the badges
+// need to be pulled out of the rucksacks so the new authenticity stickers can be attached.
 
-// Now that you're correctly decrypting the ultra top secret strategy guide, you would get a total score of 12.
+// Additionally, nobody wrote down which item type corresponds to each group's badges. The only way to tell which item type
+// is the right one is by finding the one item type that is common between all three Elves in each group.
 
-// Following the Elf's instructions for the second column, what would your total score be if everything goes
-// exactly according to your strategy guide?
+// Every set of three lines in your list corresponds to a single group, but each group can have a different badge item type.
+// So, in the above example, the first group's rucksacks are the first three lines:
+
+// vJrwpWtwJgWrhcsFMMfFFhFp
+// jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+// PmmdzqPrVvPwwTWBwg
+
+// And the second group's rucksacks are the next three lines:
+
+// wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+// ttgJtRGJQctTZtZT
+// CrZsJsPPZsGzwwsLwLmpwMDw
+
+// In the first group, the only item type that appears in all three rucksacks is lowercase r; this must be their badges. In the
+// second group, their badge item type must be Z.
+
+// Priorities for these items must still be found to organize the sticker attachment efforts: here, they are 18 (r) for the first
+// group and 52 (Z) for the second group. The sum of these is 70.
+
+// Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 const char *INPUT_FILE_PATH = "input.txt";
+const int ASCII_LOWER_OFFSET = -96;
+const int ASCII_UPPER_OFFSET = 58 + ASCII_LOWER_OFFSET;
 
-typedef struct moves {
-    int len;
-    char *oppMoves;
-    char *yourMoves;
-} moves_t;
-
-void countLine_itercbk(char *line, int lineNumber, void *returnptr) {
-    (*(int*)returnptr)++;
+int calcItemPriority(char item) {
+    int score = isupper(item) ? item + ASCII_UPPER_OFFSET : item + ASCII_LOWER_OFFSET;
+    assert(score >= 1 && score <= 52);
+    return score;
 }
 
-char calculateYourMove(char oppMove, char outcome) {
-    char yourMove = '\0';
+void calcPriority_itercbk(char *line, ssize_t lineLength, int lineNumber, void *returnptr) {
+    int firstHalfStart = 0;
+    int firstHalfEnd = (lineLength - 1) / 2;
+    int secondHalfStart = firstHalfEnd;
+    int secondHalfEnd = lineLength - 1;
+    char itemMatch = '\0';
 
-    switch(outcome) {
-        case 'Y': // draw
-            yourMove = oppMove;
+    for (int i = firstHalfStart; i < firstHalfEnd; i++) {
+        if (itemMatch != '\0')
             break;
-        case 'X': // lose
-            switch (oppMove)
-            {
-                case 'A':
-                    yourMove = 'C';
-                    break;
-                case 'B':
-                    yourMove = 'A';
-                    break;
-                case 'C':
-                    yourMove = 'B';
-                    break;
+        for (int j = secondHalfStart; j < secondHalfEnd; j++) {
+            if (line[i] == line[j]) {
+                itemMatch = line[i];
+                break;
             }
-            break;
-        case 'Z': // win
-            switch (oppMove)
-            {
-                case 'A':
-                    yourMove = 'B';
-                    break;
-                case 'B':
-                    yourMove = 'C';
-                    break;
-                case 'C':
-                    yourMove = 'A';
-                    break;
-            }
-            break;
+        }
     }
 
-    return yourMove;
-}
-
-void populateMoves_itercbk(char *line, int lineNumber, void *returnptr) {
-    moves_t *moves = (moves_t*)returnptr;
-
-    moves->oppMoves[lineNumber] = line[0];
-    moves->yourMoves[lineNumber] = calculateYourMove(line[0], line[2]);
+    assert(isalpha(itemMatch));
+    (*(int*)returnptr) = (*(int*)returnptr) + calcItemPriority(itemMatch);
 }
 
 void fileIterator(FILE *fp, void (*callback)(), void *cbkretptr) {
@@ -89,64 +80,13 @@ void fileIterator(FILE *fp, void (*callback)(), void *cbkretptr) {
 
     rewind(fp);
     while((read = getline(&line, &len, fp)) != -1) {
-        (*callback)(line, lineNumber, cbkretptr);
-        lineNumber++;
+        if (callback != NULL) {
+            (*callback)(line, read, lineNumber, cbkretptr);
+            lineNumber++;
+        }
     }
     free(line); // gets malloc'd in getline so we have to free
     rewind(fp);
-}
-
-int calculateScore(moves_t *theMoves) {
-    int totalScore = 0;
-    const int YOUR_MOVE_SCORE_ASCII_OFFSET = 64;
-    const int WIN_SCORE = 6;
-    const int DRAW_SCORE = 3;
-    const int LOSS_SCORE = 0;
-
-    for (int i = 0; i < theMoves->len; i++) {
-
-        char oppMove = theMoves->oppMoves[i];
-        char yourMove = theMoves->yourMoves[i];
-        int yourMoveScore = yourMove - YOUR_MOVE_SCORE_ASCII_OFFSET; // 'A', 'B', 'C' ascii codes = 65, 66, 67
-
-        int winLossScore = DRAW_SCORE;
-        switch(oppMove) {
-            case 'A':
-                switch(yourMove) {
-                    case 'B':
-                        winLossScore = WIN_SCORE;
-                        break;
-                    case 'C':
-                        winLossScore = LOSS_SCORE;
-                        break;
-                }
-                break;
-            case 'B':
-                switch(yourMove) {
-                    case 'A':
-                        winLossScore = LOSS_SCORE;
-                        break;
-                    case 'C':
-                        winLossScore = WIN_SCORE;
-                        break;
-                }
-                break;
-            case 'C':
-                switch(yourMove) {
-                    case 'A':
-                        winLossScore = WIN_SCORE;
-                        break;
-                    case 'B':
-                        winLossScore = LOSS_SCORE;
-                        break;
-                }
-                break;
-        }
-
-        totalScore = totalScore + winLossScore + yourMoveScore;
-    }
-
-    return totalScore;
 }
 
 int main() {
@@ -154,23 +94,10 @@ int main() {
     if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL)
         return 1;
 
-    // get file length
-    int lineCount = 0;
-    fileIterator(fp, &countLine_itercbk, &lineCount);
+    int prioritySum = 0;
+    fileIterator(fp, &calcPriority_itercbk, &prioritySum);
 
-    // init main data structure to hold moves
-    printf("%d\n", lineCount);
-    char oppMoves[lineCount];
-    char yourMoves[lineCount];
-    memset(oppMoves, 0, sizeof lineCount);
-    memset(yourMoves, 0, sizeof lineCount);
-    moves_t theMoves = {.len = lineCount, .oppMoves = oppMoves, .yourMoves = yourMoves};
-
-    // populate moves data structure
-    fileIterator(fp, &populateMoves_itercbk, &theMoves);
-
-    // done
-    printf("total score: %d\n", calculateScore(&theMoves));
+    printf("priority sum: %d\n", prioritySum);
 
     // cleanup
     fclose(fp);
