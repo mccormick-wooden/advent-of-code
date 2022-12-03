@@ -69,7 +69,7 @@ void populateMoves_itercbk(char *line, int lineNumber, void *returnptr) {
     moves->oppMoves[lineNumber] = line[0];
 
     // normalize
-    char normalized = ' ';
+    char normalized = '\0';
     if (line[2] == 'X')
         normalized = 'A';
     else if (line[2] == 'Y')
