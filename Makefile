@@ -1,6 +1,6 @@
 SRCS = $(shell find -name '*.c')
 PROGS = $(patsubst %.c,%,$(SRCS))
-CFLAGS = -Wall -fsanitize=leak
+CFLAGS = -Wall -Werror -fsanitize=leak
 
 all: $(PROGS)
 
