@@ -101,8 +101,8 @@ int calculateScore(moves_t *theMoves) {
 int main(void) {
     FILE *fp = NULL;
     if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
-        printf("Can't find %s\n", INPUT_FILE_PATH);
-        return 1;
+        fprintf(stderr, "Can't find %s\n", INPUT_FILE_PATH);
+        return EXIT_FAILURE;
     }
 
     // get file length
@@ -124,5 +124,5 @@ int main(void) {
 
     // cleanup
     fclose(fp);
-    return 0;
+    return EXIT_SUCCESS;
 }

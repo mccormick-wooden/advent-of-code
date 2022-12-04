@@ -14,58 +14,44 @@ int calcItemPriority(char item) {
     return score;
 }
 
-void calcPriority_itercbk(char *line, ssize_t lineLength, int lineNumber, void *returnptr) {
-    int firstHalfStart = 0;
-    int firstHalfEnd = (lineLength - 1) / 2;
-    int secondHalfStart = firstHalfEnd;
-    int secondHalfEnd = lineLength - 1;
-    char itemMatch = '\0';
-
-    for (int i = firstHalfStart; i < firstHalfEnd; i++) {
-        if (itemMatch != '\0')
-            break;
-        for (int j = secondHalfStart; j < secondHalfEnd; j++) {
-            if (line[i] == line[j]) {
-                itemMatch = line[i];
-                break;
-            }
-        }
-    }
-
-    assert(isalpha(itemMatch));
-    (*(int*)returnptr) = (*(int*)returnptr) + calcItemPriority(itemMatch);
-}
-
-void fileIterator(FILE *fp, void (*callback)(), void *cbkretptr) {
-    char* line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    int lineNumber = 0;
-
-    rewind(fp);
-    while((read = getline(&line, &len, fp)) != -1) {
-        if (callback != NULL) {
-            (*callback)(line, read, lineNumber, cbkretptr);
-            lineNumber++;
-        }
-    }
-    free(line); // gets malloc'd in getline so we have to free
-    rewind(fp);
-}
-
 int main(void) {
     FILE *fp = NULL;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    int solution = 0;
+
     if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
-        printf("Can't find %s\n", INPUT_FILE_PATH);
-        return 1;
+        fprintf(stderr, "Can't find %s\n", INPUT_FILE_PATH);
+        return EXIT_FAILURE;
     }
 
-    int prioritySum = 0;
-    fileIterator(fp, &calcPriority_itercbk, &prioritySum);
+    while((read = getline(&line, &len, fp)) != -1) {
+        const int firstHalfStart = 0;
+        const int firstHalfEnd = (read - 1) / 2;
+        const int secondHalfStart = firstHalfEnd;
+        const int secondHalfEnd = read - 1;
+        char itemMatch = '\0';
 
-    printf("solution: %d\n", prioritySum);
+        for (int i = firstHalfStart; i < firstHalfEnd; i++) {
+            if (itemMatch != '\0')
+                break;
+            for (int j = secondHalfStart; j < secondHalfEnd; j++) {
+                if (line[i] == line[j]) {
+                    itemMatch = line[i];
+                    break;
+                }
+            }
+        }
+
+        assert(isalpha(itemMatch));
+        solution += calcItemPriority(itemMatch);
+    }
+
+    printf("solution: %d\n", solution);
 
     // cleanup
     fclose(fp);
-    return 0;
+    free(line);
+    return EXIT_SUCCESS;
 }
