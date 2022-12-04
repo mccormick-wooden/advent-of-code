@@ -53,15 +53,17 @@ void fileIterator(FILE *fp, void (*callback)(), void *cbkretptr) {
     rewind(fp);
 }
 
-int main() {
+int main(void) {
     FILE *fp = NULL;
-    if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL)
+    if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
+        printf("Can't find %s\n", INPUT_FILE_PATH);
         return 1;
+    }
 
     int prioritySum = 0;
     fileIterator(fp, &calcPriority_itercbk, &prioritySum);
 
-    printf("priority sum: %d\n", prioritySum);
+    printf("solution: %d\n", prioritySum);
 
     // cleanup
     fclose(fp);

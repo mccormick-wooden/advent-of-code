@@ -98,17 +98,18 @@ int calculateScore(moves_t *theMoves) {
     return totalScore;
 }
 
-int main() {
+int main(void) {
     FILE *fp = NULL;
-    if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL)
+    if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
+        printf("Can't find %s\n", INPUT_FILE_PATH);
         return 1;
+    }
 
     // get file length
     int lineCount = 0;
     fileIterator(fp, &countLine_itercbk, &lineCount);
 
     // init main data structure to hold moves
-    printf("%d\n", lineCount);
     char oppMoves[lineCount];
     char yourMoves[lineCount];
     memset(oppMoves, 0, sizeof lineCount);
@@ -119,7 +120,7 @@ int main() {
     fileIterator(fp, &populateMoves_itercbk, &theMoves);
 
     // done
-    printf("total score: %d\n", calculateScore(&theMoves));
+    printf("solution: %d\n", calculateScore(&theMoves));
 
     // cleanup
     fclose(fp);

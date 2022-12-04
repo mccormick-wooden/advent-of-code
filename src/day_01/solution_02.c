@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char* CALORIE_FILE_PATH = "input.txt";
+const char *INPUT_FILE_PATH = "input.txt";
 
-int main() {
-    FILE* fs = NULL;
-    char* line = NULL;
+int main(void) {
+    FILE *fs = NULL;
+    char *line = NULL;
     size_t len = 0;
     ssize_t read;
     int current_elf_total = 0;
@@ -13,7 +13,8 @@ int main() {
     int most_calories_2 = 0;
     int most_calories_3 = 0;
 
-    if ((fs = fopen(CALORIE_FILE_PATH, "r")) == NULL) {
+    if ((fs = fopen(INPUT_FILE_PATH, "r")) == NULL) {
+        printf("Can't find %s\n", INPUT_FILE_PATH);
         return 1;
     }
 
@@ -36,7 +37,8 @@ int main() {
         }
     }
 
-    printf("best: %d\n", most_calories_1 + most_calories_2 + most_calories_3);
+    printf("solution: %d\n", most_calories_1 + most_calories_2 + most_calories_3);
     fclose(fs);
+    free(line);
     return 0;
 }
