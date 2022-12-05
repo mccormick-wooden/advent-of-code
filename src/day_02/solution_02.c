@@ -34,8 +34,8 @@ int main(void) {
     whoLosesWho['A'] = 'B';
     whoLosesWho['B'] = 'C';
 
-    while((read = getline(&line, &len, fp)) != -1) {
-        char oppMove, moveCode, yourMove;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        char oppMove, moveCode, yourMove = '\0';
         assert(sscanf(line, "%c %c", &oppMove, &moveCode) == 2);
 
         if (moveCode == DRAW_CODE) {
@@ -48,7 +48,7 @@ int main(void) {
             yourMove = whoLosesWho[(int)oppMove];
             winLossScore = WIN_SCORE;
         } else {
-            assert(1);
+            assert(1==0); // blow up if this branch is hit
         }
 
         solution += winLossScore + yourMove + YOUR_MOVE_SCORE_ASCII_OFFSET;
