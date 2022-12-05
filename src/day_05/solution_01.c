@@ -1,25 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 static const char* INPUT_FILE_PATH = "input.txt";
 static const int EMPTY = -1;
 
 typedef struct CrateStack {
-    char stack[8];
+    char stack[256];
     int topIndex;
 } CrateStack_t;
-
-CrateStack_t* initCrateStacks(FILE* file) {
-    CrateStack_t* cs = calloc(9, sizeof(CrateStack_t));
-
-    for (int i = 0; i < 9; i++) { cs[i].topIndex = EMPTY; }
-
-    // file processing
-
-    rewind(file);
-    return cs;
-}
 
 int isEmpty(CrateStack_t* cs) {
     return cs->topIndex == EMPTY;
@@ -45,12 +35,54 @@ void push(CrateStack_t* cs, char crate) {
     cs->topIndex++;
 }
 
+char peek(CrateStack_t* cs) {
+    return cs->stack[cs->topIndex];
+}
+
+void execMoveInstruction(int num, CrateStack_t* from, CrateStack_t* to) {
+    while (num > 0) {
+        push(to, pop(from));
+        num--;
+    }
+}
+
+CrateStack_t* initCrateStacks(FILE* fp) {
+    CrateStack_t* cs = calloc(9, sizeof(CrateStack_t));
+    for (int i = 0; i < 9; i++) { cs[i].topIndex = EMPTY; }
+
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    const int STACK_LINE_OFFSET = 50;
+    char stackLines[8*STACK_LINE_OFFSET] = {0};
+
+    for (int i = 0; i < 8; i++) {
+        read = getline(&line, &len, fp);
+        strncpy(&stackLines[i*STACK_LINE_OFFSET], line, read);
+    }
+
+    for (int i = 7; i >= 0; i--) {
+        int stack_offset = 1;
+        for (int j = 0; j < 9; j++) {
+            char crate = stackLines[i*STACK_LINE_OFFSET+stack_offset];
+            if (crate != ' ') {
+                push(&cs[j], crate);
+            }
+
+            stack_offset += 4;
+        }
+    }
+
+    rewind(fp);
+    free(line);
+    return cs;
+}
+
 int main(void) {
     FILE* fp = NULL;
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
-    int solution = 0;
 
     if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
         fprintf(stderr, "Can't find %s\n", INPUT_FILE_PATH);
@@ -59,11 +91,25 @@ int main(void) {
 
     CrateStack_t* cs = initCrateStacks(fp);
 
-    while((read = getline(&line, &len, fp)) != -1) {
+    int lineNumber = 0;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        lineNumber++;
+        if (lineNumber < 11) {
+            continue; // Don't parse any crate stack info from top of the file
+        }
 
+        int numToMove, fromStackId, toStackId;
+        assert(sscanf(line, "move %d from %d to %d", &numToMove, &fromStackId, &toStackId) == 3);
+
+        execMoveInstruction(numToMove, &cs[fromStackId-1], &cs[toStackId-1]);
     }
 
-    printf("solution: %d\n", solution);
+    char solution[10] = {0};
+    for (int i = 0; i < 9; i++) {
+        solution[i] = peek(&cs[i]);
+    }
+
+    printf("solution: %s\n", solution);
 
     // cleanup
     fclose(fp);
