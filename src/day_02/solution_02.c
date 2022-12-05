@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-const char *INPUT_FILE_PATH = "input.txt";
+static const char *INPUT_FILE_PATH = "input.txt";
 
 int main(void) {
     FILE *fp = NULL;

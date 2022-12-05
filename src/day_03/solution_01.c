@@ -4,9 +4,9 @@
 #include <ctype.h>
 #include <assert.h>
 
-const char *INPUT_FILE_PATH = "input.txt";
-const int ASCII_LOWER_OFFSET = -96;
-const int ASCII_UPPER_OFFSET = 58 + ASCII_LOWER_OFFSET;
+static const char *INPUT_FILE_PATH = "input.txt";
+static const int ASCII_LOWER_OFFSET = -96;
+static const int ASCII_UPPER_OFFSET = 58 + ASCII_LOWER_OFFSET;
 
 int calcItemPriority(char item) {
     int score = isupper(item) ? item + ASCII_UPPER_OFFSET : item + ASCII_LOWER_OFFSET;
