@@ -10,7 +10,7 @@ int main(void) {
     char* line = NULL;
     size_t len = 0;
     int solution = 0;
-    const int MAGIC_LEN = 14;
+    const int MAGIC_LEN = 4;
     int offset = 0;
 
     if ((fp = fopen(INPUT_FILE_PATH, "r")) == NULL) {
