@@ -63,7 +63,8 @@ CrateStack_t* initCrateStacks(FILE* fp) {
     size_t len = 0;
     ssize_t read;
     const int STACK_LINE_OFFSET = 50;
-    char stackLines[8*STACK_LINE_OFFSET] = {0};
+    char stackLines[8*STACK_LINE_OFFSET];
+    memset(stackLines, 0, sizeof(stackLines));
 
     for (int i = 0; i < 8; i++) {
         read = getline(&line, &len, fp);
